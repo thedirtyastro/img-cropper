@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crop & Convert WebP · Batch 16:9</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0c0f;--panel:#14161b;--line:#292d35;--muted:#9ba3b4;--text:#f5f7fb;--accent:#9ef01a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b2029 0%,var(--bg) 55%);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,sans-serif}
+.wrap{width:min(1180px,calc(100% - 32px));margin:auto;padding:32px 0 50px}header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:28px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px;letter-spacing:-.04em}.mark{width:38px;height:38px;border-radius:12px;background:var(--accent);color:#111;display:grid;place-items:center;font-size:22px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:7px 12px;color:var(--muted);font-size:12px}h1{font-size:clamp(34px,5vw,56px);line-height:1.02;letter-spacing:-.06em;margin:0 0 12px}h1 span{color:var(--accent)}.intro{color:var(--muted);max-width:650px;margin:0 0 25px}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);gap:18px;align-items:start}.card{background:rgba(20,22,27,.94);border:1px solid var(--line);border-radius:18px;overflow:hidden}.head{padding:16px 19px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.head small{color:var(--muted)}
+.stage{min-height:380px;padding:20px;display:grid;place-items:center;background-color:#101216;background-image:linear-gradient(45deg,#171a20 25%,transparent 25%),linear-gradient(-45deg,#171a20 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#171a20 75%),linear-gradient(-45deg,transparent 75%,#171a20 75%);background-size:22px 22px;background-position:0 0,0 11px,11px -11px,-11px 0}
+.empty{text-align:center;max-width:350px;padding:24px}.icon{width:56px;height:56px;border:1px solid #3b414d;border-radius:16px;display:grid;place-items:center;margin:0 auto 14px;color:var(--accent);font-size:27px}.empty h3{margin:0 0 6px}.empty p{color:var(--muted);font-size:13px;margin:0 0 17px}
+.preview{display:none;position:relative;max-width:100%;line-height:0;touch-action:none;user-select:none}#img{display:block;max-width:100%;max-height:570px;width:auto;height:auto}#overlay{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+.hint{padding:12px 19px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.controls{padding:19px}.field{margin-bottom:18px}.field>label{display:flex;justify-content:space-between;gap:10px;font-weight:650;font-size:13px;margin-bottom:8px}input[type=text],input[type=number],select{width:100%;background:#0e1014;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;outline:none}input[type=range]{width:100%;accent-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:12px 14px;font-weight:750;font-size:13px;cursor:pointer}.btn:disabled{opacity:.35;cursor:not-allowed}.primary{background:var(--accent);color:#10120b;width:100%}.secondary{background:#222630;color:var(--text);border:1px solid #343945}.row{display:flex;gap:9px}.row .btn{flex:1}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat{background:#101216;border:1px solid var(--line);border-radius:11px;padding:11px}.stat small{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em}.stat b{font-size:17px}.status{font-size:12px;color:var(--muted);min-height:20px;margin-top:12px}.privacy{font-size:12px;color:var(--muted);margin-top:13px}.privacy b{color:var(--accent)}.progress{font-size:12px;color:var(--muted);margin:12px 0 0}#files{display:none}.queue{display:flex;gap:7px;overflow:auto;padding:12px 15px;border-top:1px solid var(--line)}.thumb{flex:0 0 62px;width:62px;height:48px;border:2px solid transparent;border-radius:7px;overflow:hidden;background:#222;cursor:pointer;padding:0}.thumb.active{border-color:var(--accent)}.thumb img{width:100%;height:100%;object-fit:cover}.thumb span{font-size:10px;color:var(--muted)}footer{text-align:center;color:#697181;font-size:12px;margin-top:20px}
+@media(max-width:820px){.layout{grid-template-columns:1fr}.stage{min-height:270px;padding:12px}.pill{display:none}.wrap{padding-top:22px}}
+</style>
+</head>
+<body><div class="wrap">
+<header><div class="brand"><div class="mark">↗</div> crop<span style="color:var(--accent)">.webp</span></div><div class="pill">Batch crop · 16:9 · ZIP export</div></header>
+<h1>One ratio. Many images.<br><span>One tidy folder.</span></h1>
+<p class="intro">Choose a batch of images, crop each one in 16:9, then download everything as a ZIP in your named folder. Your images stay in your browser.</p>
+<input id="files" type="file" accept="image/*" multiple>
+<div class="layout">
+<section class="card"><div class="head"><strong>01 / Crop workspace</strong><small id="fileLabel">No images selected</small></div>
+<div class="stage" id="stage"><div class="empty" id="empty"><div class="icon">＋</div><h3>Choose multiple images</h3><p>Pick the images you want to crop, then work through them from first to last.</p><button class="btn secondary" id="choose">Select images</button></div>
+<div class="preview" id="preview"><img id="img" alt="Image to crop"><canvas id="overlay"></canvas></div></div>
+<div class="hint">Drag to position a 16:9 crop. The crop stays locked to 16:9. Use Previous and Next to move through the selected images.</div>
+<div class="queue" id="queue"></div></section>
+<aside class="card"><div class="head"><strong>02 / Batch export</strong><small style="color:var(--accent)">WEBP</small></div><div class="controls">
+<div class="field"><label for="folder">Output folder name</label><input id="folder" type="text" value="cropped-images" placeholder="e.g. wedding-gallery"></div>
+<div class="field"><label>Crop ratio <span style="color:var(--accent)">● 16:9</span></label><div class="stats"><div class="stat"><small>ASPECT RATIO</small><b>16 : 9</b></div><div class="stat"><small>IMAGE PROGRESS</small><b id="progress">0 / 0</b></div></div></div>
+<div class="field"><label for="quality">WebP quality <span id="qval">88%</span></label><input id="quality" type="range" min="10" max="100" value="88"></div>
+<div class="field"><label for="size">Output resolution</label><select id="size"><option value="crop">Use crop's natural resolution</option><option value="1920">1920 × 1080 (Full HD)</option><option value="1280">1280 × 720 (HD)</option><option value="960">960 × 540</option></select></div>
+<div class="stats"><div class="stat"><small>CROP WIDTH</small><b id="cw">— px</b></div><div class="stat"><small>CROP HEIGHT</small><b id="ch">— px</b></div></div>
+<div class="row" style="margin-top:15px"><button class="btn secondary" id="prev" disabled>← Previous</button><button class="btn secondary" id="next" disabled>Next →</button></div>
+<div class="row" style="margin-top:9px"><button class="btn secondary" id="reset" disabled>Reset crop</button><button class="btn secondary" id="replace">Change batch</button></div>
+<button class="btn primary" id="export" disabled style="margin-top:13px">↓ Export all as ZIP</button>
+<div class="status" id="status" role="status"></div><div class="progress">Files inside ZIP: <b>banner.webp</b> (copy of the first crop), <b>01.webp</b> (same first crop), then <b>02.webp, 03.webp…</b> in selection order.</div>
+<div class="privacy"><b>Private by design.</b> Images are processed locally. Export creates one ZIP download containing your named folder.</div>
+</div></aside></div><footer>Crop once, batch export, keep the original files untouched.</footer></div>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+(()=> {
+const $=id=>document.getElementById(id), filesInput=$('files'), img=$('img'), overlay=$('overlay'), ctx=overlay.getContext('2d');
+let items=[], index=0, crop=null, dragging=false, start=null, scaleX=1, scaleY=1, loadedUrl=null;
+const RATIO=16/9;
+function status(s){$('status').textContent=s}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+$('choose').onclick=()=>filesInput.click();$('replace').onclick=()=>filesInput.click();
+filesInput.onchange=()=>{const selected=[...filesInput.files].filter(f=>f.type.startsWith('image/'));if(!selected.length)return;items=selected.map(file=>({file,url:URL.createObjectURL(file),crop:null,nw:0,nh:0}));index=0;filesInput.value='';showItem();};
+function showItem(){
+ if(!items.length)return;
+ const item=items[index];crop=item.crop?{...item.crop}:null;
+ img.onload=()=>{item.nw=img.naturalWidth;item.nh=img.naturalHeight;requestAnimationFrame(sizeOverlay);};
+ img.src=item.url;$('empty').style.display='none';$('preview').style.display='block';
+ $('fileLabel').textContent=`${index+1}/${items.length} · ${item.file.name}`;
+ $('progress').textContent=`${index+1} / ${items.length}`;$('prev').disabled=index===0;$('next').disabled=index===items.length-1;
+ $('export').disabled=false;$('reset').disabled=false;renderQueue();status(`Image ${index+1} of ${items.length}. Adjust the 16:9 crop, then continue.`);
+}
+function renderQueue(){const q=$('queue');q.innerHTML='';items.forEach((it,i)=>{const b=document.createElement('button');b.className='thumb'+(i===index?' active':'');b.title=it.file.name;const t=document.createElement('img');t.src=it.url;b.appendChild(t);b.onclick=()=>{saveCrop();index=i;showItem()};q.appendChild(b)})}
+function sizeOverlay(){const r=img.getBoundingClientRect();if(!r.width||!r.height)return;const d=devicePixelRatio||1;overlay.width=Math.round(r.width*d);overlay.height=Math.round(r.height*d);overlay.style.width=r.width+'px';overlay.style.height=r.height+'px';scaleX=img.naturalWidth/r.width;scaleY=img.naturalHeight/r.height;draw()}
+function draw(){const d=devicePixelRatio||1;ctx.clearRect(0,0,overlay.width,overlay.height);if(!crop){$('cw').textContent='— px';$('ch').textContent='— px';return}
+const x=crop.x/scaleX*d,y=crop.y/scaleY*d,w=crop.w/scaleX*d,h=crop.h/scaleY*d;
+ctx.fillStyle='rgba(0,0,0,.56)';ctx.fillRect(0,0,overlay.width,overlay.height);ctx.clearRect(x,y,w,h);ctx.strokeStyle='#9ef01a';ctx.lineWidth=2*d;ctx.strokeRect(x,y,w,h);
+ctx.fillStyle='#9ef01a';const s=7*d;[[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([a,b])=>ctx.fillRect(a-s/2,b-s/2,s,s));
+$('cw').textContent=Math.round(crop.w)+' px';$('ch').textContent=Math.round(crop.h)+' px'}
+function point(e){const r=overlay.getBoundingClientRect();return{x:clamp(e.clientX-r.left,0,r.width)*scaleX,y:clamp(e.clientY-r.top,0,r.height)*scaleY}}
+overlay.onpointerdown=e=>{if(!img.naturalWidth)return;dragging=true;start=point(e);crop={x:start.x,y:start.y,w:0,h:0};overlay.setPointerCapture(e.pointerId);draw()};
+overlay.onpointermove=e=>{if(!dragging||!start)return;const p=point(e),maxW=img.naturalWidth,maxH=img.naturalHeight;let dx=p.x-start.x,dy=p.y-start.y;
+ // Keep 16:9, expanding toward the pointer while staying inside image bounds.
+ let w=Math.abs(dx),h=w/RATIO;if(h>Math.abs(dy)){h=Math.abs(dy);w=h*RATIO}
+ const signX=dx<0?-1:1,signY=dy<0?-1:1;let x=signX<0?start.x-w:start.x,y=signY<0?start.y-h:start.y;
+ w=Math.min(w,signX<0?start.x:maxW-start.x);h=w/RATIO;
+ if(y<0){h-=Math.abs(y);w=h*RATIO;y=0}
+ if(y+h>maxH){h=maxH-y;w=h*RATIO}
+ if(x<0){w-=Math.abs(x);h=w/RATIO;x=0}
+ if(x+w>maxW){w=maxW-x;h=w/RATIO}
+ crop={x:Math.max(0,x),y:Math.max(0,y),w:Math.max(0,w),h:Math.max(0,h)};draw()};
+function end(){if(!dragging)return;dragging=false;if(!crop||crop.w<2||crop.h<2)crop=null;saveCrop();draw()}
+overlay.onpointerup=end;overlay.onpointercancel=end;
+function saveCrop(){if(items[index])items[index].crop=crop?{...crop}:null}
+$('prev').onclick=()=>{saveCrop();if(index>0){index--;showItem()}};
+$('next').onclick=()=>{saveCrop();if(index<items.length-1){index++;showItem()}};
+$('reset').onclick=()=>{crop=null;saveCrop();draw();status('Crop reset. The full image will be center-cropped to 16:9 during export.')};
+$('quality').oninput=()=> $('qval').textContent=$('quality').value+'%';
+window.onresize=()=>{if(img.naturalWidth)requestAnimationFrame(sizeOverlay)};
+function makeBlob(item){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>{let c=item.crop?{...item.crop}:null;
+ // With no manual selection, automatically center-crop to 16:9.
+ if(!c||c.w<2||c.h<2){let w=image.naturalWidth,h=w/RATIO;if(h>image.naturalHeight){h=image.naturalHeight;w=h*RATIO}c={x:(image.naturalWidth-w)/2,y:(image.naturalHeight-h)/2,w,h}}
+ let sw=Math.round(c.w),sh=Math.round(c.h),sx=Math.round(c.x),sy=Math.round(c.y),ow=sw,oh=sh;
+ const mode=$('size').value;if(mode!=='crop'){ow=Number(mode);oh=Math.round(ow/RATIO)}
+ const canvas=document.createElement('canvas');canvas.width=ow;canvas.height=oh;canvas.getContext('2d').drawImage(image,sx,sy,sw,sh,0,0,ow,oh);
+ canvas.toBlob(b=>b?resolve(b):reject(new Error('WebP conversion failed')),'image/webp',Number($('quality').value)/100)
+ };image.onerror=()=>reject(new Error('Could not read '+item.file.name));image.src=item.url})}
+$('export').onclick=async()=>{
+ if(!items.length)return;if(typeof JSZip==='undefined'){status('ZIP library could not load. Check your internet connection and reopen this tool.');return}
+ saveCrop();const folderName=$('folder').value.trim().replace(/[\\/:*?"<>|]/g,'-')||'cropped-images';
+ $('export').disabled=true;const zip=new JSZip(),folder=zip.folder(folderName);
+ try{
+  const blobs=[];
+  for(let i=0;i<items.length;i++){status(`Cropping and converting ${i+1} of ${items.length}…`);blobs.push(await makeBlob(items[i]))}
+  // First crop intentionally appears twice: banner.webp and 01.webp.
+  folder.file('banner.webp',blobs[0]);folder.file('01.webp',blobs[0]);
+  for(let i=1;i<blobs.length;i++)folder.file(String(i+1).padStart(2,'0')+'.webp',blobs[i]);
+  status('Building ZIP archive…');const result=await zip.generateAsync({type:'blob'},m=>status(`Building ZIP archive… ${Math.round(m.percent)}%`));
+  const url=URL.createObjectURL(result),a=document.createElement('a');a.href=url;a.download=folderName+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  status(`Done! ${blobs.length} images cropped. ZIP contains ${folderName}/banner.webp and ${folderName}/01.webp (same first crop), then numbered images.`);
+ }catch(e){status('Export failed: '+e.message)}finally{$('export').disabled=false}
+};
+})();
+</script></body></html>
